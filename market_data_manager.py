@@ -59,6 +59,78 @@ class MarketDataManager:
             self.mt5_connected = False
             self.logger.info("MT5 connection closed")
     
+    def validate_symbol(self, symbol: str) -> bool:
+        """
+        Validate symbol and add to Market Watch if needed
+        
+        Returns:
+            True if symbol is available and has data
+        """
+        if not self.mt5_connected:
+            return False
+            
+        # Check if symbol exists
+        symbol_info = mt5.symbol_info(symbol)
+        
+        if symbol_info is None:
+            # Try alternative formats
+            alternatives = self._get_symbol_alternatives(symbol)
+            for alt in alternatives:
+                symbol_info = mt5.symbol_info(alt)
+                if symbol_info:
+                    self.logger.info(f"Found alternative symbol: {alt} for {symbol}")
+                    symbol = alt
+                    break
+            
+            if symbol_info is None:
+                self.logger.warning(f"Symbol {symbol} not available")
+                return False
+        
+        # Add to Market Watch if not visible
+        if not symbol_info.visible:
+            self.logger.info(f"Adding {symbol} to Market Watch...")
+            if not mt5.symbol_select(symbol, True):
+                self.logger.warning(f"Failed to add {symbol} to Market Watch")
+                return False
+        
+        # Verify we can get tick data
+        tick = mt5.symbol_info_tick(symbol)
+        if tick is None:
+            self.logger.warning(f"No tick data available for {symbol}")
+            return False
+            
+        self.logger.info(f"✅ {symbol} validated - Bid: {tick.bid}, Ask: {tick.ask}")
+        return True
+    
+    def _get_symbol_alternatives(self, symbol: str) -> List[str]:
+        """Get alternative symbol names to try"""
+        alternatives = [
+            symbol,
+            symbol + ".raw",
+            symbol + ".",
+            symbol.replace(".", ""),
+            symbol.replace("-", ""),
+        ]
+        
+        # Forex specific alternatives
+        if len(symbol) == 6 and symbol.isalpha():
+            alternatives.extend([
+                symbol + "m",
+                symbol + ".m", 
+                symbol.lower(),
+                symbol.upper()
+            ])
+        
+        # Index alternatives  
+        if symbol.startswith("US"):
+            alternatives.extend([
+                symbol.replace("US", "NAS100"),
+                symbol + ".cash",
+                symbol + ".f"
+            ])
+            
+        return list(set(alternatives))
+    
     def get_symbol_info(self, symbol: str) -> Optional[Dict]:
         """Get comprehensive symbol information"""
         try:
@@ -113,42 +185,66 @@ class MarketDataManager:
             timeframe: MT5 timeframe constant (e.g., mt5.TIMEFRAME_M30)
             bars: Number of historical bars to retrieve
         """
+        import time
+        start_time = time.time()
+        
         try:
+            self.logger.debug(f"📊 {symbol}: Starting market data fetch...")
+            
             if not self.mt5_connected:
-                self.logger.error("MT5 not connected")
+                self.logger.error(f"❌ {symbol}: MT5 not connected")
                 return None
             
             # Ensure symbol is available
+            self.logger.debug(f"🔍 {symbol}: Checking symbol info...")
             symbol_info = self.get_symbol_info(symbol)
             if symbol_info is None:
+                self.logger.warning(f"❌ {symbol}: Symbol info not available")
                 return None
             
             # Get historical rates
+            self.logger.debug(f"📈 {symbol}: Fetching {bars} bars from MT5...")
+            rates_start = time.time()
             rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, bars)
+            rates_time = time.time() - rates_start
+            
             if rates is None or len(rates) < 50:
-                self.logger.warning(f"Insufficient data for {symbol}: {len(rates) if rates is not None else 0} bars")
+                self.logger.warning(f"❌ {symbol}: Insufficient data: {len(rates) if rates is not None else 0} bars (took {rates_time:.3f}s)")
                 return None
             
+            self.logger.debug(f"✅ {symbol}: Got {len(rates)} bars in {rates_time:.3f}s")
+            
             # Convert to DataFrame
+            self.logger.debug(f"🔄 {symbol}: Converting to DataFrame...")
+            df_start = time.time()
             df = pd.DataFrame(rates)
             df['time'] = pd.to_datetime(df['time'], unit='s')
             df.set_index('time', inplace=True)
             
             # Add technical indicators
             df = self._add_technical_indicators(df)
+            df_time = time.time() - df_start
+            
+            total_time = time.time() - start_time
+            self.logger.debug(f"✅ {symbol}: Data ready - {len(df)} bars, conversion: {df_time:.3f}s, total: {total_time:.3f}s")
             
             return df
             
         except Exception as e:
-            self.logger.error(f"Error getting live data for {symbol}: {e}")
+            total_time = time.time() - start_time
+            self.logger.error(f"❌ {symbol}: Error getting live data in {total_time:.3f}s: {e}")
             return None
     
     def get_current_price(self, symbol: str) -> Optional[Dict]:
         """Get current bid/ask prices"""
         try:
+            self.logger.debug(f"💰 {symbol}: Fetching current price...")
             tick = mt5.symbol_info_tick(symbol)
             if tick is None:
+                self.logger.warning(f"❌ {symbol}: No tick data available")
                 return None
+            
+            self.logger.debug(f"✅ {symbol}: Price - Bid: {tick.bid}, Ask: {tick.ask}")
             
             return {
                 'symbol': symbol,
@@ -221,8 +317,10 @@ class MarketDataManager:
     
     def validate_data_quality(self, df: pd.DataFrame, symbol: str) -> bool:
         """Validate data quality for Elliott Wave analysis"""
+        self.logger.debug(f"🔍 {symbol}: Validating data quality...")
+        
         if df is None or len(df) < 100:
-            self.logger.warning(f"{symbol}: Insufficient data ({len(df) if df is not None else 0} bars)")
+            self.logger.warning(f"❌ {symbol}: Insufficient data ({len(df) if df is not None else 0} bars)")
             return False
         
         # Check for missing values
