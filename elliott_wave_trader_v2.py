@@ -488,7 +488,7 @@ def main():
         print(f"🚫 ML Filtering: DISABLED")
     if args.no_ema:
         print(f"🚫 EMA Filtering: DISABLED")
-    print(f"📊 Scan Interval: {args.interval}s")
+    print(f"📊 Scan Interval: 120s")
     print(f"{'='*50}")
     
     # Setup logging with UTF-8 encoding
