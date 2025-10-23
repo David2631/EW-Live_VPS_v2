@@ -542,7 +542,7 @@ def main():
     
     # Setup logging with UTF-8 encoding
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
             logging.FileHandler(f'elliott_wave_v2_{datetime.now().strftime("%Y%m%d")}.log', encoding='utf-8'),
