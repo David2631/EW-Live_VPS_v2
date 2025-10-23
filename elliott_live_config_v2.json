@@ -1,0 +1,146 @@
+{
+  "description": "Elliott Wave Live Trading System V2 - Professional Configuration",
+  "version": "2.0.0",
+  "created": "2025-01-19",
+  
+  "symbols": [
+    "EURUSD",
+    "XAUUSD", 
+    "US30",
+    "NAS100",
+    "US500.f",
+    "AUDNOK"
+  ],
+  
+  "timeframes": [
+    30
+  ],
+  
+  "scan_interval": 120,
+  "account_balance": 1000,
+  
+  "risk_parameters": {
+    "max_risk_per_trade": 0.02,
+    "max_daily_risk": 0.05,
+    "max_portfolio_risk": 0.08,
+    "max_correlation_risk": 0.02,
+    "max_consecutive_losses": 3,
+    "min_reward_risk_ratio": 2.0
+  },
+  
+  "elliott_wave_settings": {
+    "min_zigzag_deviation": 0.5,
+    "min_wave_strength": 3.0,
+    "fibonacci_tolerance": 0.1,
+    "min_impulse_confidence": 70.0,
+    "min_abc_confidence": 65.0,
+    "wave_validation": {
+      "wave_1_min_atr": 2.0,
+      "wave_3_min_extension": 1.0,
+      "wave_5_max_extension": 2.618,
+      "wave_2_max_retrace": 0.786,
+      "wave_4_max_retrace": 0.618
+    }
+  },
+  
+  "signal_generation": {
+    "min_confidence": 70.0,
+    "max_spread_pips": 3.0,
+    "fibonacci_levels": [0.236, 0.382, 0.5, 0.618, 0.786],
+    "trend_alignment_required": true,
+    "momentum_confirmation": true
+  },
+  
+  "execution_settings": {
+    "max_slippage_pips": 3.0,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 1.0,
+    "magic_number": 202501,
+    "order_comment_prefix": "EW_V2"
+  },
+  
+  "trading_hours": {
+    "start": "07:00",
+    "end": "21:00",
+    "timezone": "UTC",
+    "exclude_weekends": true,
+    "exclude_holidays": true
+  },
+  
+  "symbol_specific": {
+    "EURUSD": {
+      "pip_factor": 0.0001,
+      "min_stop_loss_pips": 20,
+      "max_stop_loss_pips": 100,
+      "preferred_session": "london_ny_overlap"
+    },
+    "XAUUSD": {
+      "pip_factor": 0.1,
+      "min_stop_loss_pips": 50,
+      "max_stop_loss_pips": 200,
+      "preferred_session": "ny_session"
+    },
+    "US30": {
+      "pip_factor": 1.0,
+      "min_stop_loss_pips": 30,
+      "max_stop_loss_pips": 150,
+      "preferred_session": "ny_session"
+    },
+    "NAS100": {
+      "pip_factor": 1.0,
+      "min_stop_loss_pips": 40,
+      "max_stop_loss_pips": 200,
+      "preferred_session": "ny_session"
+    },
+    "US500.f": {
+      "pip_factor": 1.0,
+      "min_stop_loss_pips": 25,
+      "max_stop_loss_pips": 120,
+      "preferred_session": "ny_session"
+    },
+    "AUDNOK": {
+      "pip_factor": 0.0001,
+      "min_stop_loss_pips": 30,
+      "max_stop_loss_pips": 150,
+      "preferred_session": "sydney_tokyo"
+    }
+  },
+  
+  "monitoring": {
+    "position_check_interval": 30,
+    "status_log_interval": 300,
+    "performance_report_interval": 3600,
+    "emergency_stop_conditions": {
+      "max_daily_loss_percent": 2.5,
+      "max_consecutive_losses": 3,
+      "max_open_positions": 10
+    }
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "file_rotation": "daily",
+    "max_log_files": 30,
+    "signal_logging": true,
+    "execution_logging": true,
+    "performance_logging": true
+  },
+  
+  "notifications": {
+    "enabled": false,
+    "webhook_url": "",
+    "notify_on": {
+      "trade_execution": true,
+      "emergency_stop": true,
+      "system_errors": true,
+      "daily_summary": true
+    }
+  },
+  
+  "development": {
+    "paper_trading": false,
+    "debug_mode": false,
+    "backtesting_mode": false,
+    "verbose_logging": false
+  }
+}

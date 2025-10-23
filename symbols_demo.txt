@@ -1,0 +1,4 @@
+# Demo Symbol-Liste für Tests (nur 1 Symbol)
+# Perfekt für erste Tests und Entwicklung
+
+EURUSD

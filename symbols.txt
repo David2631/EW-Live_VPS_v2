@@ -1,0 +1,39 @@
+# Elliott Wave Trading Symbols Configuration
+# Ein Symbol pro Zeile
+# Zeilen die mit # beginnen sind Kommentare
+# Leer Zeilen werden ignoriert
+
+# Major Forex Pairs
+EURUSD
+GBPUSD
+AUDUSD
+NZDUSD
+USDCHF
+USDCAD
+
+# Precious Metals
+XAUUSD
+# XAGUSD - Temporarily disabled (pip calibration issue)
+
+# US Indices
+US30
+NAS100
+US500.f
+
+# European Indices
+DE40
+UK100
+FR40
+
+# Exotic Pairs (optional)
+AUDNOK
+EURNOK
+EURAUD
+
+# Cryptocurrencies (wenn verfügbar)
+# BTCUSD
+# ETHUSD
+
+# Commodities (wenn verfügbar)
+# USOIL
+# BRENT

@@ -1,0 +1,8 @@
+# Einfache Symbol-Liste für Tests
+# Diese Symbole sind fast überall verfügbar
+
+EURUSD
+XAUUSD
+US30
+NAS100
+AUDNOK
