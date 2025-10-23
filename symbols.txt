@@ -13,27 +13,109 @@ USDCAD
 
 # Precious Metals
 XAUUSD
-# XAGUSD - Temporarily disabled (pip calibration issue)
 
-# US Indices
-US30
+# Indizes
+ESTX50
+FRA40
+GER30
 NAS100
-US500.f
-
-# European Indices
-DE40
+SPX100
 UK100
-FR40
+US30
+JPN225
+CHINAA50
+HK50
+GER40
+AUS200
+ESP35
+SUI20
 
-# Exotic Pairs (optional)
-AUDNOK
-EURNOK
-EURAUD
+# Indizes Future
+DE30.f
+DJ30.f
+ES35.f
+HK50.f
+JP225.f
+SWI20.f
+UK100.f
+US500.f
+USTEC.f
+JPN225.f
+NE25.f
+DE40.f
 
-# Cryptocurrencies (wenn verfügbar)
-# BTCUSD
-# ETHUSD
+#Commodicis F+ Spo
+NGAS.f
+USOIL.f
+UKBRENT.f
+SILVER.f
+GOLD.f
+XAGUSD
+XAUUSD
 
-# Commodities (wenn verfügbar)
-# USOIL
-# BRENT
+#Crypto
+BTCUSD
+ETHUSD
+BCHUSD
+LTCUSD
+XRPUSD
+ADAUSD
+DOGUSD
+DOTUSD
+LNKUSD
+ATOMUSD
+AXSUSD
+DOGEUSD
+SOLUSD
+UNIUSD
+XLMUSD
+
+#Aktien
+#Deutschland
+ADSGn.DE
+ALVF.DE
+BAYGn.DE
+BMWG.DE
+CBKG.DE
+DAIGn.DE
+DBKGn.DE
+DPWGn.DE
+EONGn.DE
+LHAG.DE
+SIEGn.DE
+VOWG_p.DE
+
+#USA
+
+EEM.P
+EWZ.P
+FXI.P
+GLD.P
+IWM.P
+QQQ.OQ
+SPY.P
+VTI.P
+XLF.P
+XLI.P
+XLK.P
+XLU.P
+XLV.P
+AAL.OQ
+AAPL.OQ
+ADBE.OQ
+AIG.N
+AKAM.OQ
+ALL.N
+AMZN.OQ
+ATHM.N
+AXP.N
+BA.N
+BABA.N
+BAC.N
+BBY.N
+BEN.N
+BIDU.OQ
+BK.N
+BKNG.OQ
+
+
