@@ -1,0 +1,17 @@
+# Elliott Wave Trading - Low Margin Symbols (Forex Focus)
+# Optimiert für kleinere Konten mit weniger Margin-Anforderungen
+
+# Major Forex Pairs (niedrige Margin)
+EURUSD
+GBPUSD
+AUDUSD
+NZDUSD
+USDCHF
+USDCAD
+
+# Precious Metals (moderate Margin)
+XAUUSD
+
+# Nur die wichtigsten Krypto (falls verfügbar)
+BTCUSD
+ETHUSD
