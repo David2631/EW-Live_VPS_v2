@@ -93,7 +93,7 @@ class ElliottWaveTradingEngine:
             return {
                 'symbols': ['EURUSD', 'XAUUSD', 'US30', 'NAS100', 'US500.f', 'AUDNOK'],
                 'timeframes': [mt5.TIMEFRAME_M30],
-                'scan_interval': 60,
+                'scan_interval': 120,
                 'account_balance': 10000,
                 'risk_parameters': {
                     'max_risk_per_trade': 0.01,
@@ -519,8 +519,8 @@ def main():
                        help='Disable EMA trend filtering')
     parser.add_argument('--config', default='elliott_live_config_v2.json',
                        help='Configuration file to use')
-    parser.add_argument('--interval', type=int, default=60,
-                       help='Scan interval in seconds (default: 60)')
+    parser.add_argument('--interval', type=int, default=120,
+                       help='Scan interval in seconds (default: 120)')
     parser.add_argument('--max-dd-check', action='store_true',
                        help='Enable maximum drawdown monitoring')
     
