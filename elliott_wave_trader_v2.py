@@ -284,17 +284,23 @@ class ElliottWaveTradingEngine:
                 self.logger.debug(f"⏭️ {symbol}: Skipping - analyzed {seconds_since_last:.1f}s ago")
                 return "skipped"  # Too soon since last analysis
             
-            # Get market data
+            # Get market data with FORCED logging
+            self.logger.info(f"📊 {symbol}: FETCHING MARKET DATA NOW...")
             df = self.market_data.get_live_data(symbol, mt5.TIMEFRAME_M30, 200)
             if df is None or not self.market_data.validate_data_quality(df, symbol):
-                self.logger.debug(f"❌ {symbol}: No valid data")
+                self.logger.warning(f"❌ {symbol}: No valid data available")
                 return "no_data"
+            else:
+                self.logger.info(f"✅ {symbol}: GOT {len(df)} BARS OF MARKET DATA")
             
             # Get current price
+            self.logger.info(f"💰 {symbol}: FETCHING CURRENT PRICE...")
             current_price = self.market_data.get_current_price(symbol)
             if current_price is None:
-                self.logger.debug(f"❌ {symbol}: No current price")
+                self.logger.warning(f"❌ {symbol}: No current price available")
                 return "no_price"
+            else:
+                self.logger.info(f"💰 {symbol}: CURRENT PRICE = {current_price.get('bid', 'N/A')}/{current_price.get('ask', 'N/A')}")
             
             # Generate trading signal
             signal = self.signal_generator.generate_signal(symbol, df, current_price)

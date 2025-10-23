@@ -24,6 +24,15 @@ def test_market_data_isolated():
     # Create manager
     manager = MarketDataManager()
     
+    # CRITICAL: Connect to MT5 first!
+    print("🔗 Connecting to MT5...")
+    if not manager.connect():
+        print("❌ FAILED to connect to MT5!")
+        return
+    else:
+        print("✅ MT5 connected successfully")
+    print()
+    
     # Test symbols
     symbols = ['EURUSD', 'GBPUSD', 'AUDUSD', 'XAUUSD', 'US30']
     
