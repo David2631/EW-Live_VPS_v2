@@ -232,18 +232,32 @@ class ElliottWaveTradingEngine:
                     
                     try:
                         symbol_start = time.time()
-                        self._analyze_symbol(symbol)
+                        result = self._analyze_symbol(symbol)
                         symbol_time = time.time() - symbol_start
                         symbols_processed += 1
                         
-                        self.logger.debug(f"✅ {symbol} analyzed in {symbol_time:.2f}s ({symbols_processed}/{total_symbols})")
+                        # Log detailed result
+                        if result == "skipped":
+                            self.logger.info(f"⏭️ {symbol} skipped (too recent) ({symbols_processed}/{total_symbols})")
+                        elif result == "no_data":
+                            self.logger.info(f"❌ {symbol} no data ({symbols_processed}/{total_symbols})")
+                        elif result == "analyzed":
+                            self.logger.info(f"✅ {symbol} analyzed in {symbol_time:.2f}s ({symbols_processed}/{total_symbols})")
+                        else:
+                            self.logger.info(f"🔄 {symbol} processed in {symbol_time:.2f}s ({symbols_processed}/{total_symbols})")
                         
                     except Exception as e:
                         self.logger.error(f"❌ Error analyzing {symbol}: {e}")
                         symbols_processed += 1  # Count failed attempts too
                 
                 scan_duration = time.time() - scan_start_time
+                
+                # Count results by type
+                result_counts = {}
+                # This is a bit hacky but works for now - in future we could track results properly
+                
                 self.logger.info(f"📊 Scan completed: {symbols_processed}/{total_symbols} symbols in {scan_duration:.2f}s")
+                self.logger.info(f"🚀 Speed: {symbols_processed/scan_duration:.1f} symbols/second")
                 
                 # Ensure minimum 120 second interval regardless of scan time
                 remaining_time = self.config['scan_interval'] - scan_duration
@@ -262,24 +276,32 @@ class ElliottWaveTradingEngine:
         try:
             # Check if enough time has passed since last analysis
             now = datetime.now()
-            if (now - self.last_analysis_time.get(symbol, datetime.min)).seconds < 30:
-                return  # Too soon since last analysis
+            last_analysis = self.last_analysis_time.get(symbol, datetime.min)
+            seconds_since_last = (now - last_analysis).total_seconds()
+            
+            # Skip only if analyzed in last 10 seconds (prevent spam)
+            if seconds_since_last < 10:
+                self.logger.debug(f"⏭️ {symbol}: Skipping - analyzed {seconds_since_last:.1f}s ago")
+                return "skipped"  # Too soon since last analysis
             
             # Get market data
             df = self.market_data.get_live_data(symbol, mt5.TIMEFRAME_M30, 200)
             if df is None or not self.market_data.validate_data_quality(df, symbol):
-                return
+                self.logger.debug(f"❌ {symbol}: No valid data")
+                return "no_data"
             
             # Get current price
             current_price = self.market_data.get_current_price(symbol)
             if current_price is None:
-                return
+                self.logger.debug(f"❌ {symbol}: No current price")
+                return "no_price"
             
             # Generate trading signal
             signal = self.signal_generator.generate_signal(symbol, df, current_price)
             if signal is None:
                 self.last_analysis_time[symbol] = now
-                return
+                self.logger.debug(f"🔍 {symbol}: No signal generated")
+                return "no_signal"
             
             # Risk management check
             symbol_info = self.market_data.get_symbol_info(symbol)
@@ -300,7 +322,7 @@ class ElliottWaveTradingEngine:
             if not can_trade:
                 self.logger.warning(f"🚫 {symbol}: Trade blocked - {risk_reason}")
                 self.last_analysis_time[symbol] = now
-                return
+                return "risk_blocked"
             
             # Execute trade
             if position_size.is_valid and signal.confidence >= 70:
@@ -318,12 +340,18 @@ class ElliottWaveTradingEngine:
                     self._log_signal_execution(signal, position_size, execution_result)
                 else:
                     self.logger.error(f"❌ {symbol}: Trade execution failed - {execution_result.error_message}")
+                    return "trade_failed"
+            else:
+                self.logger.debug(f"🔍 {symbol}: Signal found but not executed (confidence: {signal.confidence}%)")
+                return "signal_low_confidence"
             
             self.session_stats['signals_generated'] += 1
             self.last_analysis_time[symbol] = now
+            return "analyzed"
             
         except Exception as e:
             self.logger.error(f"Symbol analysis error for {symbol}: {e}")
+            return "error"
     
     def _monitoring_loop(self):
         """Position monitoring loop"""
