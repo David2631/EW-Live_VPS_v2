@@ -211,7 +211,7 @@ class ElliottWaveTradingEngine:
             self.logger.info("Elliott Wave Trading Engine V2 stopped")
     
     def _analysis_loop(self):
-        """Main analysis loop - runs in separate thread"""
+        """Main analysis loop - runs in separate thread with complete scan guarantee"""
         while self.is_running and not self.stop_event.is_set():
             try:
                 # Check trading hours
@@ -219,18 +219,39 @@ class ElliottWaveTradingEngine:
                     time.sleep(60)  # Check every minute during off-hours
                     continue
                 
-                # Analyze each symbol
+                scan_start_time = time.time()
+                symbols_processed = 0
+                total_symbols = len(self.config['symbols'])
+                
+                self.logger.info(f"🔄 Starting scan cycle for {total_symbols} symbols...")
+                
+                # Analyze each symbol - COMPLETE ALL before next cycle
                 for symbol in self.config['symbols']:
                     if self.stop_event.is_set():
                         break
                     
                     try:
+                        symbol_start = time.time()
                         self._analyze_symbol(symbol)
+                        symbol_time = time.time() - symbol_start
+                        symbols_processed += 1
+                        
+                        self.logger.debug(f"✅ {symbol} analyzed in {symbol_time:.2f}s ({symbols_processed}/{total_symbols})")
+                        
                     except Exception as e:
-                        self.logger.error(f"Error analyzing {symbol}: {e}")
+                        self.logger.error(f"❌ Error analyzing {symbol}: {e}")
+                        symbols_processed += 1  # Count failed attempts too
                 
-                # Wait for next scan
-                time.sleep(self.config['scan_interval'])
+                scan_duration = time.time() - scan_start_time
+                self.logger.info(f"📊 Scan completed: {symbols_processed}/{total_symbols} symbols in {scan_duration:.2f}s")
+                
+                # Ensure minimum 120 second interval regardless of scan time
+                remaining_time = self.config['scan_interval'] - scan_duration
+                if remaining_time > 0:
+                    self.logger.info(f"⏱️ Waiting {remaining_time:.1f}s until next scan (120s interval)")
+                    time.sleep(remaining_time)
+                else:
+                    self.logger.warning(f"⚠️ Scan took {scan_duration:.1f}s (longer than {self.config['scan_interval']}s interval)")
                 
             except Exception as e:
                 self.logger.error(f"Analysis loop error: {e}")
